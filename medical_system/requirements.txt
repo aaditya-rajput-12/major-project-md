@@ -1,3 +1,4 @@
 django>=4.2
 qrcode[pil]>=7.4
 Pillow>=9.0
+gunicorn
