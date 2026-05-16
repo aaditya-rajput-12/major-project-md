@@ -1,0 +1,203 @@
+{% extends "health_app/base.html" %}
+{% block title %}Report - {{ report.patient.name }}{% endblock %}
+{% block page_title %}📋 Report — {{ report.patient.name }}{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'patient_detail' report.patient.pk %}" class="btn btn-outline">← Back</a>
+<a href="{% url 'report_edit' report.report_id %}" class="btn btn-outline">✏️ Edit</a>
+{% if not treatment %}
+<form method="post" action="{% url 'report_analyze' report.report_id %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-accent">🤖 Analyze with AI</button>
+</form>
+{% else %}
+<form method="post" action="{% url 'report_analyze' report.report_id %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline">🔄 Re-Analyze</button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Report Info -->
+<div class="card">
+    <div class="card-title">📄 Report Details</div>
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Patient</div>
+            <div class="info-value"><a href="{% url 'patient_detail' report.patient.pk %}">{{ report.patient.name }}</a></div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Report Type</div>
+            <div class="info-value">{{ report.get_report_type_display }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Date</div>
+            <div class="info-value">{{ report.report_date|date:"d M Y" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Severity</div>
+            <div class="info-value"><span class="badge badge-{{ report.severity }}">{{ report.get_severity_display }}</span></div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value"><span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span></div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Report ID</div>
+            <div class="info-value" style="font-size:0.8rem; color:var(--text-muted);">{{ report.report_id }}</div>
+        </div>
+        {% if report.detected_condition %}
+        <div class="info-item" style="grid-column:span 2;">
+            <div class="info-label">Detected Condition</div>
+            <div class="info-value" style="font-size:1.05rem; color:var(--primary); font-weight:600;">{{ report.detected_condition }}</div>
+        </div>
+        {% endif %}
+        {% if report.symptoms %}
+        <div class="info-item" style="grid-column:span 2;">
+            <div class="info-label">Symptoms</div>
+            <div class="info-value">{{ report.symptoms }}</div>
+        </div>
+        {% endif %}
+        {% if report.doctor_notes %}
+        <div class="info-item" style="grid-column:span 2;">
+            <div class="info-label">Doctor Notes</div>
+            <div class="info-value">{{ report.doctor_notes }}</div>
+        </div>
+        {% endif %}
+        {% if report.report_file %}
+        <div class="info-item">
+            <div class="info-label">Attached File</div>
+            <div class="info-value"><a href="{{ report.report_file.url }}" target="_blank" class="btn btn-outline btn-sm">📎 View File</a></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- QR CODE -->
+{% if qr_code %}
+<div class="card">
+    <div class="card-title">📱 Report QR Code</div>
+    <div class="qr-section">
+        <img src="{{ qr_code.qr_image.url }}" alt="QR Code" class="qr-img">
+        <div class="qr-info">
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:8px;">Scan this QR code to access this report directly on any device.</p>
+            <p style="font-size:0.8rem; background:var(--bg); padding:8px 12px; border-radius:6px; word-break:break-all;">{{ qr_code.qr_data }}</p>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">Generated: {{ qr_code.created_at|date:"d M Y H:i" }}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- TREATMENT PLAN -->
+{% if treatment %}
+<div class="card">
+    <div class="card-title">💊 Treatment Plan
+        {% if treatment.generated_by_ai %}<span style="background:var(--accent); color:white; font-size:0.7rem; padding:2px 8px; border-radius:10px; margin-left:8px;">AI Generated</span>{% endif %}
+    </div>
+
+    <div class="treatment-grid">
+        <div class="treatment-item">
+            <div class="treatment-label blue">💊 Medications</div>
+            <div class="treatment-text">{{ treatment.medications|default:"—" }}</div>
+        </div>
+        <div class="treatment-item">
+            <div class="treatment-label green">🏃 Exercises</div>
+            <div class="treatment-text">{{ treatment.exercises|default:"—" }}</div>
+        </div>
+        <div class="treatment-item">
+            <div class="treatment-label green">✅ Recommended Foods</div>
+            <div class="treatment-text">{{ treatment.recommended_foods|default:"—" }}</div>
+        </div>
+        <div class="treatment-item">
+            <div class="treatment-label red">❌ Foods to Avoid</div>
+            <div class="treatment-text">{{ treatment.avoid_foods|default:"—" }}</div>
+        </div>
+        <div class="treatment-item">
+            <div class="treatment-label orange">⚠️ Precautions</div>
+            <div class="treatment-text">{{ treatment.precautions|default:"—" }}</div>
+        </div>
+        <div class="treatment-item">
+            <div class="treatment-label red">🚫 Activities to Avoid</div>
+            <div class="treatment-text">{{ treatment.avoid_activities|default:"—" }}</div>
+        </div>
+        <div class="treatment-item full">
+            <div class="treatment-label blue">🌿 Lifestyle Changes</div>
+            <div class="treatment-text">{{ treatment.lifestyle_changes|default:"—" }}</div>
+        </div>
+        {% if treatment.additional_notes %}
+        <div class="treatment-item full">
+            <div class="treatment-label blue">📝 Additional Notes</div>
+            <div class="treatment-text">{{ treatment.additional_notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+    <p style="margin-top:14px; font-size:0.82rem; color:var(--text-muted);">
+        ⏰ Follow-up recommended in <strong>{{ treatment.followup_in_days }} days</strong>
+    </p>
+</div>
+{% else %}
+<div class="card" style="border: 2px dashed var(--border); text-align:center; padding:40px;">
+    <p style="font-size:1.1rem; color:var(--text-muted);">🤖 No treatment plan yet.</p>
+    <p style="color:var(--text-muted); margin:8px 0 16px;">Click "Analyze with AI" to generate a treatment plan and diet plan automatically.</p>
+    <form method="post" action="{% url 'report_analyze' report.report_id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-accent">🤖 Analyze with AI Now</button>
+    </form>
+</div>
+{% endif %}
+
+<!-- DIET PLAN -->
+{% if diet_plan %}
+<div class="card">
+    <div class="card-title">🥗 {{ diet_plan.title }}</div>
+    {% if diet_plan.description %}
+    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:16px;">{{ diet_plan.description }}</p>
+    {% endif %}
+
+    <div style="overflow-x:auto;">
+        <div class="diet-grid">
+            {% for day in diet_days %}
+            <div class="diet-day-card">
+                <div class="diet-day-title">Day {{ day.day_number }}</div>
+                <div class="meal-slot">
+                    <div class="meal-name">🌅 Breakfast</div>
+                    <div class="meal-desc">{{ day.breakfast }}</div>
+                </div>
+                {% if day.mid_morning %}
+                <div class="meal-slot">
+                    <div class="meal-name">🍎 Mid Morning</div>
+                    <div class="meal-desc">{{ day.mid_morning }}</div>
+                </div>
+                {% endif %}
+                <div class="meal-slot">
+                    <div class="meal-name">☀️ Lunch</div>
+                    <div class="meal-desc">{{ day.lunch }}</div>
+                </div>
+                {% if day.evening %}
+                <div class="meal-slot">
+                    <div class="meal-name">🍵 Evening</div>
+                    <div class="meal-desc">{{ day.evening }}</div>
+                </div>
+                {% endif %}
+                <div class="meal-slot">
+                    <div class="meal-name">🌙 Dinner</div>
+                    <div class="meal-desc">{{ day.dinner }}</div>
+                </div>
+                <div class="meal-slot" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+                    <div class="meal-name">💧 Water</div>
+                    <div class="meal-desc">{{ day.water_intake }}</div>
+                </div>
+                {% if day.notes %}
+                <div class="meal-slot" style="margin-top:6px;">
+                    <div class="meal-name">📝 Note</div>
+                    <div class="meal-desc" style="font-style:italic;">{{ day.notes }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "health_app/base.html" %}
+{% block title %}Patients{% endblock %}
+{% block page_title %}👥 Patients{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'patient_add' %}" class="btn btn-primary">➕ Add Patient</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <!-- Search -->
+    <form method="get" style="margin-bottom:16px; display:flex; gap:10px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search patients by name..." class="form-input" style="max-width:300px;">
+        <button type="submit" class="btn btn-outline">🔍 Search</button>
+        {% if query %}<a href="{% url 'patient_list' %}" class="btn btn-outline">✕ Clear</a>{% endif %}
+    </form>
+
+    {% if patients %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Reports</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td><strong>{{ patient.name }}</strong></td>
+                <td>{{ patient.age }}</td>
+                <td>{{ patient.get_gender_display }}</td>
+                <td>{{ patient.phone|default:"—" }}</td>
+                <td>
+                    <span style="background:var(--primary); color:white; padding:3px 10px; border-radius:12px; font-size:0.8rem; font-weight:600;">
+                        {{ patient.reports.count }}
+                    </span>
+                </td>
+                <td style="color:var(--text-muted);">{{ patient.created_at|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline btn-sm">View</a>
+                    <a href="{% url 'patient_edit' patient.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                    <a href="{% url 'patient_delete' patient.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center; padding:40px; color:var(--text-muted);">
+        {% if query %}No patients found for "{{ query }}".{% else %}No patients yet. <a href="{% url 'patient_add' %}">Add your first patient.</a>{% endif %}
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

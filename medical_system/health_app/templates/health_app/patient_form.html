@@ -1,0 +1,44 @@
+{% extends "health_app/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px;">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                {{ form.name }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Age *</label>
+                {{ form.age }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gender *</label>
+                {{ form.gender }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                {{ form.phone }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Address</label>
+            {{ form.address }}
+        </div>
+        {% if form.errors %}
+        <div class="message message-error">Please fix the errors below: {{ form.errors }}</div>
+        {% endif %}
+        <div style="display:flex; gap:10px; margin-top:8px;">
+            <button type="submit" class="btn btn-primary">💾 Save Patient</button>
+            <a href="{% url 'patient_list' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

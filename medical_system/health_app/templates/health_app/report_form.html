@@ -1,0 +1,55 @@
+{% extends "health_app/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }} — {{ patient.name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:750px;">
+    <p style="color:var(--text-muted); margin-bottom:20px;">Patient: <strong>{{ patient.name }}</strong> | Age: {{ patient.age }}</p>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Report Type *</label>
+                {{ form.report_type }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Report Date *</label>
+                {{ form.report_date }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Detected Condition / Disease</label>
+                {{ form.detected_condition }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Severity</label>
+                {{ form.severity }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Symptoms</label>
+            {{ form.symptoms }}
+        </div>
+        <div class="form-group">
+            <label class="form-label">Doctor Notes</label>
+            {{ form.doctor_notes }}
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Upload Report File (PDF/Image)</label>
+                {{ form.report_file }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+            </div>
+        </div>
+        {% if form.errors %}
+        <div class="message message-error">{{ form.errors }}</div>
+        {% endif %}
+        <div style="display:flex; gap:10px; margin-top:8px;">
+            <button type="submit" class="btn btn-primary">💾 Save Report</button>
+            <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

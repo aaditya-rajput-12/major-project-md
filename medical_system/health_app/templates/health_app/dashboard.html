@@ -1,0 +1,94 @@
+{% extends "health_app/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'patient_add' %}" class="btn btn-primary">New Patient</a>
+{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div>
+            <div class="stat-value">{{ total_patients }}</div>
+            <div class="stat-label">Total Patients</div>
+        </div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon"></div>
+        <div>
+            <div class="stat-value">{{ total_reports }}</div>
+            <div class="stat-label">Total Reports</div>
+        </div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon"></div>
+        <div>
+            <div class="stat-value">{{ pending_reports }}</div>
+            <div class="stat-label">Pending Analysis</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div>
+            <div class="stat-value">{{ analyzed }}</div>
+            <div class="stat-label">Analyzed Reports</div>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <!-- Recent Reports -->
+    <div class="card">
+        <div class="card-title"> Recent Reports</div>
+        {% if recent_reports %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Patient</th><th>Type</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                {% for report in recent_reports %}
+                <tr>
+                    <td><strong>{{ report.patient.name }}</strong></td>
+                    <td>{{ report.get_report_type_display }}</td>
+                    <td><span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span></td>
+                    <td><a href="{% url 'report_detail' report.report_id %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted); text-align:center; padding:20px;">No reports yet. Add a patient and upload their report.</p>
+        {% endif %}
+    </div>
+
+    <!-- Recent Patients -->
+    <div class="card">
+        <div class="card-title"> Recent Patients</div>
+        {% if recent_patients %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Age</th><th>Reports</th><th></th></tr>
+                </thead>
+                <tbody>
+                {% for patient in recent_patients %}
+                <tr>
+                    <td><strong>{{ patient.name }}</strong></td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.reports.count }}</td>
+                    <td><a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted); text-align:center; padding:20px;">No patients yet. <a href="{% url 'patient_add' %}">Add your first patient.</a></p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

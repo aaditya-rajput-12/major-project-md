@@ -1,0 +1,86 @@
+{% extends "health_app/base.html" %}
+{% block title %}{{ patient.name }}{% endblock %}
+{% block page_title %}{{ patient.name }}{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'report_add' patient.pk %}" class="btn btn-primary">📋 Add Report</a>
+<a href="{% url 'patient_edit' patient.pk %}" class="btn btn-outline">✏️ Edit</a>
+{% endblock %}
+
+{% block content %}
+<!-- Patient Info Card -->
+<div class="card">
+    <div class="card-title">👤 Patient Information</div>
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Full Name</div>
+            <div class="info-value">{{ patient.name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Age</div>
+            <div class="info-value">{{ patient.age }} years</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Gender</div>
+            <div class="info-value">{{ patient.get_gender_display }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Phone</div>
+            <div class="info-value">{{ patient.phone|default:"—" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ patient.email|default:"—" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Registered On</div>
+            <div class="info-value">{{ patient.created_at|date:"d M Y" }}</div>
+        </div>
+        {% if patient.address %}
+        <div class="info-item" style="grid-column:span 2;">
+            <div class="info-label">Address</div>
+            <div class="info-value">{{ patient.address }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Reports -->
+<div class="card">
+    <div class="section-header">
+        <div class="section-title">📋 Medical Reports ({{ reports.count }})</div>
+        <a href="{% url 'report_add' patient.pk %}" class="btn btn-primary btn-sm">➕ Add Report</a>
+    </div>
+
+    {% if reports %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Date</th><th>Type</th><th>Condition</th><th>Severity</th><th>Status</th><th>QR</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.report_date|date:"d M Y" }}</td>
+                <td>{{ report.get_report_type_display }}</td>
+                <td>{{ report.detected_condition|default:"—" }}</td>
+                <td><span class="badge badge-{{ report.severity }}">{{ report.get_severity_display }}</span></td>
+                <td><span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span></td>
+                <td>
+                    {% if report.qr_code %}
+                    <img src="{{ report.qr_code.qr_image.url }}" alt="QR" style="width:40px; height:40px;">
+                    {% else %}—{% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'report_detail' report.report_id %}" class="btn btn-outline btn-sm">View</a>
+                    <a href="{% url 'report_delete' report.report_id %}" class="btn btn-danger btn-sm">Del</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center; padding:30px; color:var(--text-muted);">No reports yet. <a href="{% url 'report_add' patient.pk %}">Add first report.</a></p>
+    {% endif %}
+</div>
+{% endblock %}
